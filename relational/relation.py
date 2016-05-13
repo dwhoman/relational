@@ -239,6 +239,13 @@ class Relation (object):
         newt.content = self.content.difference(other.content)
         return newt
 
+    def symmetric_diff(self, other):
+        '''Symmeric difference operation. The result will contain items unique
+        to either operand. Will return an empty one if all items are
+        held in common.
+        '''
+        return (self.union(other)).difference(self.intersection(other))
+
     def division(self, other):
         '''Division operator
         The division is a binary operation that is written as R ÷ S. The
@@ -373,6 +380,25 @@ class Relation (object):
                     newt.content.add(tuple(item))
 
         return newt
+
+    def semijoin_left(self, other):
+        '''
+        Performs a natural join and returns those columns present in the first operand.
+        '''
+        return (self.join(other)).projection(self.header)
+
+    def semijoin_right(self, other):
+        '''
+        Performs a natural join and returns those columns present in the second operand.
+        '''
+        return other.semijoin_left(self)
+
+    def antijoin(self, other):
+        '''Antijoin, returns rows from the first operand that do not have
+        equal values in the second operand for equivalent column names.
+
+        '''
+        return self.difference(self.semijoin_left(other))
 
     def __eq__(self, other):
         if not isinstance(other, relation):
